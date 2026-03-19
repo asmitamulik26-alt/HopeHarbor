@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Volunteer Personal Details</title>
+
+<style>
+body{
+    font-family: Arial;
+    margin:0;
+    background: linear-gradient(to right,#021b13,#064d36);
+}
+
+.container{
+    width:650px;
+    margin:40px auto;
+    background:#dff5ee;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px #021b13;
+}
+
+h2{
+    background:#064d36;
+    color:white;
+    padding:10px;
+    border-radius:5px;
+    text-align:center;
+}
+
+.section{
+    margin-top:15px;
+    padding:10px;
+    border:1px solid #064d36;
+    border-radius:5px;
+    background:#e9fff8;
+}
+
+.section h3{
+    margin:0 0 10px 0;
+    color:#064d36;
+}
+
+label{
+    font-weight:bold;
+}
+
+input,select,textarea{
+    width:100%;
+    padding:8px;
+    margin:6px 0;
+    border-radius:5px;
+    border:1px solid #064d36;
+}
+
+button{
+    background:#0b7a56;
+    color:white;
+    padding:10px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    width:100%;
+    margin-top:10px;
+}
+
+button:hover{
+    background:#021b13;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Volunteer Registration Form</h2>
+
+<div class="section">
+<h3>Basic Information</h3>
+
+<label>Full Name</label>
+<input type="text" id="name">
+
+<label>Date of Birth</label>
+<input type="date" id="dob">
+
+<label>Phone Number</label>
+<input type="tel" id="phone">
+
+<label>Email</label>
+<input type="email" id="email">
+
+<label>Address</label>
+<textarea id="address"></textarea>
+
+<label>City</label>
+<input type="text" id="city">
+
+</div>
+
+<div class="section">
+<h3>Volunteer Details</h3>
+
+<label>Skills</label>
+<select id="skills">
+<option>Rescue Operations</option>
+<option>Medical Assistance</option>
+<option>Food Distribution</option>
+<option>Logistics</option>
+</select>
+
+<label>Availability</label>
+<select id="availability">
+<option>Full Time</option>
+<option>Part Time</option>
+<option>Weekends</option>
+</select>
+
+<label>Emergency Contact</label>
+<input type="tel" id="emergency">
+
+</div>
+
+<div class="section">
+<h3>ID Verification</h3>
+
+<label>Aadhar Number</label>
+<input type="text" id="aadhar">
+
+<label>Document Link (Google Drive / Cloud)</label>
+<input type="url" id="idProofURL" placeholder="Paste your document link here">
+
+</div>
+
+<button onclick="submitVolunteer()">Submit Volunteer Details</button>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+    apiKey:"AIzaSyDRLJ66Vic8tl9Qm2E4cXNwnsDRysKH4Vw",
+    authDomain:"shsms-ba375.firebaseapp.com",
+    projectId:"shsms-ba375",
+    storageBucket:"shsms-ba375.appspot.com",
+    messagingSenderId:"439498208613",
+    appId:"1:439498208613:web:09bdc77ee2f6c338269d8c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// UID from localStorage
+const uid = localStorage.getItem("currentUserUID") || "guest_" + Date.now();
+
+window.submitVolunteer = async function(){
+
+    const name = document.getElementById("name").value;
+    const dob = document.getElementById("dob").value;
+    const phone = document.getElementById("phone").value;
+    const email = document.getElementById("email").value;
+    const address = document.getElementById("address").value;
+    const city = document.getElementById("city").value;
+    const skills = document.getElementById("skills").value;
+    const availability = document.getElementById("availability").value;
+    const emergency = document.getElementById("emergency").value;
+    const aadhar = document.getElementById("aadhar").value;
+    const idProofURL = document.getElementById("idProofURL").value;
+
+    try{
+        await setDoc(doc(db,"volunteers",uid),{
+            name,
+            dob,
+            phone,
+            email,
+            address,
+            city,
+            skills,
+            availability,
+            emergency,
+            aadhar,
+            idProofURL
+        });
+
+        alert("Volunteer Registered Successfully!\nDocument Link: " + idProofURL);
+
+        // Clear form after submission
+        document.querySelectorAll("input,textarea,select").forEach(el => el.value = "");
+
+    }catch(error){
+        console.error("Error saving details:", error);
+        alert("Error saving details. Check console for more info.");
+    }
+}
+</script>
+
+</body>
+</html>

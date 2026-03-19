@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SHSMS Signup Portal</title>
+
+<style>
+
+body{
+font-family: Arial;
+margin:0;
+background:linear-gradient(to right,#021b13,#064d36);
+}
+
+header{
+background:#021b13;
+color:white;
+padding:20px;
+text-align:center;
+position:relative;
+}
+
+.close-btn{
+position:absolute;
+right:20px;
+top:15px;
+background:#0b7a56;
+color:white;
+border:none;
+font-size:18px;
+padding:6px 12px;
+border-radius:5px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.close-btn:hover{
+background:#064d36;
+}
+
+nav{
+background:#064d36;
+padding:10px;
+text-align:center;
+}
+
+nav a{
+color:white;
+margin:15px;
+text-decoration:none;
+font-weight:bold;
+}
+
+nav a:hover{
+color:#dff5ee;
+}
+
+.container{
+width:70%;
+margin:auto;
+background:#dff5ee;
+padding:20px;
+border-radius:10px;
+margin-top:30px;
+box-shadow:0px 0px 10px #021b13;
+}
+
+h2{
+background:#064d36;
+color:white;
+padding:10px;
+border-radius:5px;
+}
+
+label{
+font-weight:bold;
+}
+
+input,select{
+width:100%;
+padding:8px;
+margin:8px 0;
+border-radius:5px;
+border:1px solid #064d36;
+}
+
+button{
+background:#0b7a56;
+color:white;
+padding:10px 20px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+font-size:16px;
+}
+
+button:hover{
+background:#021b13;
+}
+
+.section{
+margin-bottom:25px;
+padding:15px;
+background:#e6f7f1;
+border-radius:8px;
+}
+
+.footer{
+text-align:center;
+padding:10px;
+color:white;
+background:#021b13;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<button class="close-btn" onclick="goToWelcome()">✖</button>
+
+<marquee>
+<h1 style="font-size:40px;font-weight:bold;">
+🏠 Smart Homeless Shelter Management System - Signup Portal
+</h1>
+</marquee>
+
+</header>
+
+<nav>
+<a href="#">Signup</a>
+</nav>
+
+<div class="container">
+
+<div class="section">
+
+<h2>Create New Account</h2>
+
+<form id="signupForm">
+
+<label>Full Name</label>
+<input type="text" id="name" placeholder="Enter your full name" required>
+
+<label>Email</label>
+<input type="email" id="email" placeholder="Enter email" required>
+
+<label>Password</label>
+<input type="password" id="password" placeholder="Create password" required>
+
+<label>Choose Account Type</label>
+
+<select id="role" required>
+<option value="">Select Account Type</option>
+<option>User</option>
+<option>Volunteer</option>
+<option>Shelter Admin</option>
+<option>Admin</option>
+</select>
+
+<br><br>
+
+<button type="submit">Submit Registration</button>
+
+</form>
+
+</div>
+
+</div>
+
+<div class="footer">
+<p>SHSMS Platform © 2026 | Helping Communities</p>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+
+import { 
+getAuth, 
+createUserWithEmailAndPassword,
+sendEmailVerification 
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+
+import { 
+getFirestore, 
+doc, 
+setDoc 
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+apiKey: "AIzaSyDRLJ66Vic8tl9Qm2E4cXNwnsDRysKH4Vw",
+authDomain: "shsms-ba375.firebaseapp.com",
+projectId: "shsms-ba375",
+storageBucket: "shsms-ba375.appspot.com",
+messagingSenderId: "439498208613",
+appId: "1:439498208613:web:09bdc77ee2f6c338269d8c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+document.getElementById("signupForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+let name=document.getElementById("name").value;
+let email=document.getElementById("email").value;
+let password=document.getElementById("password").value;
+let role=document.getElementById("role").value;
+
+try{
+
+// Create account
+const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+
+const user = userCredential.user;
+const uid = user.uid;
+
+// Send verification email
+await sendEmailVerification(user);
+
+// Save user in Firestore
+await setDoc(doc(db,"users",uid),{
+name:name,
+email:email,
+role:role
+});
+
+alert("Account Created Successfully! Please check your email.");
+
+window.location.href="welcome.html";
+
+}catch(error){
+
+alert("Signup Error: "+error.message);
+console.error(error);
+
+}
+
+});
+
+
+window.goToWelcome=function(){
+window.location.href="welcome.html";
+}
+
+</script>
+
+</body>
+</html>

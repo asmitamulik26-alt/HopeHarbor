@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HopeHarbor - Smart Homeless Shelter Allocation</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+
+<style>
+/* ===== PAGE BACKGROUND ===== */
+body{
+  margin:0;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(-45deg, #e0f2f1, #a5d6a7, #c8e6c9, #dcedc8, #f1f8e9);
+  background-size: 600% 600%;
+  animation: bgMove 20s ease infinite;
+  overflow-x:hidden;
+}
+
+@keyframes bgMove{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  width:100%;
+  height:100%;
+  background: radial-gradient(circle,#ffffff33 2px,transparent 2px);
+  background-size:50px 50px;
+  animation:particles 25s linear infinite;
+  pointer-events:none;
+}
+
+@keyframes particles{
+  from{background-position:0 0;}
+  to{background-position:200px 200px;}
+}
+
+/* ===== HEADER ===== */
+header{
+  background: linear-gradient(90deg,#1b5e20,#4caf50,#81c784);
+  padding:20px;
+  text-align:center;
+  border-bottom:5px solid #388e3c;
+  border-radius:0 0 20px 20px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  position:relative;
+  overflow:hidden;
+}
+
+/* Marquee gradient text */
+header marquee{
+  display:inline-block;
+  font-size:36px;
+  font-weight:bold;
+}
+
+header marquee .header-text {
+  background: linear-gradient(45deg,#ffd54f,#ffffff,#81c784,#4caf50);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientText 5s ease infinite;
+}
+
+@keyframes gradientText {
+  0% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+  100% { background-position:0% 50%; }
+}
+
+header::after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:5px;
+  background: linear-gradient(90deg,#ffffff,#ffd54f,#ffffff);
+  background-size:300% 100%;
+  animation: underlineMove 4s linear infinite;
+}
+
+@keyframes underlineMove{
+  0%{background-position:0% 0%;}
+  50%{background-position:100% 0%;}
+  100%{background-position:0% 0%;}
+}
+
+/* ===== LAYOUT ===== */
+.main{
+  display:flex;
+  height:90vh;
+}
+
+/* LEFT PANEL */
+.left{
+  width:200px;
+  background: linear-gradient(180deg,#a5d6a7,#81c784);
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  border-right:2px solid #388e3c;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.left button{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+  border-radius:10px;
+  background: linear-gradient(90deg,#ffffff88,#ffffff33);
+  color:#1b5e20;
+  box-shadow:0 3px 6px rgba(0,0,0,0.2);
+  transition:0.4s;
+}
+
+.left button:hover{
+  background: linear-gradient(90deg,#ffffff,#c8e6c9);
+  transform: scale(1.05);
+}
+
+/* CENTER FORM */
+.center{
+  flex:2;
+  padding:30px;
+  background: rgba(255,255,255,0.95);
+  overflow:auto;
+  margin-left:-5px;
+  border-radius:15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* RIGHT MAP */
+.right{
+  width:55%; 
+  margin-left:-5%;
+}
+
+#map{
+  height:98%;
+  width:100%;
+  border:3px solid #1b5e20;
+  border-radius:15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  transition:0.5s;
+}
+
+/* ===== FORM STYLE ===== */
+h2{
+  font-size:26px;
+  color:#1b5e20;
+  margin-bottom:20px;
+  text-shadow:1px 1px 2px #ccc;
+}
+
+.form-group{
+  margin-bottom:20px;
+}
+
+.form-group label{
+  display:block;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.form-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.form-row label{
+  font-weight:normal;
+  font-size:16px;
+}
+
+.form-group select,
+.form-group input[type=text]{
+  width:85%;
+  padding:12px;
+  font-size:16px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  background-color:white;
+  box-shadow: inset 0 2px 5px #ddd;
+  transition:0.3s;
+}
+
+.form-group select:hover,
+.form-group input[type=text]:hover{
+  box-shadow: inset 0 2px 6px #bbb;
+}
+
+.mainBtn{
+  background: linear-gradient(90deg,#1b5e20,#4caf50);
+  color:white;
+  padding:12px 25px;
+  border:none;
+  font-size:18px;
+  cursor:pointer;
+  border-radius:10px;
+  font-weight:bold;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  transition:0.4s;
+}
+
+.mainBtn:hover{
+  transform:scale(1.05);
+  background: linear-gradient(90deg,#4caf50,#81c784);
+}
+
+/* TABS */
+.tab{
+  display:none;
+}
+
+.tab.active{
+  display:block;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <marquee><span class="header-text">HopeHarbor - Smart Homeless Shelter Allocation</span></marquee>
+</header>
+
+<div class="main">
+
+<!-- LEFT -->
+<div class="left">
+<button onclick="openTab(1)">Location</button>
+<button onclick="openTab(2)">Stay</button>
+<button onclick="openTab(3)">Safety</button>
+<button onclick="openTab(4)">Medical</button>
+<button onclick="openTab(5)">Food</button>
+<button onclick="openTab(6)">Rules</button>
+<button onclick="openTab(7)">Priority</button>
+<button onclick="openTab(8)">Search</button>
+</div>
+
+<!-- CENTER -->
+<div class="center">
+
+<!-- TAB 1 -->
+<div id="tab1" class="tab active">
+<h2>Location Details</h2>
+<div class="form-group"><label>City</label><input id="city"></div>
+<div class="form-group"><label>Area</label><input id="area"></div>
+<div class="form-group"><label>Landmark</label><input id="land"></div>
+<div class="form-group"><label>Pincode</label><input id="pin"></div>
+<div class="form-group"><label>Selected Location</label><input id="locText" readonly></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Street</label><input id="street"></div>
+<div class="form-group"><label>Nearby Bus Stop</label><input id="bus"></div>
+
+</div>
+
+<!-- TAB 2 -->
+<div id="tab2" class="tab">
+<h2>Stay & Distance</h2>
+<div class="form-group"><label>Stay Duration</label>
+<select>
+<option>One night</option>
+<option>Few days</option>
+<option>One week</option>
+<option>Few weeks</option>
+<option>Long term</option>
+<option>Permanent</option>
+</select></div>
+<div class="form-group"><label>Distance Range</label>
+<select>
+<option>2 km</option>
+<option>5 km</option>
+<option>10 km</option>
+<option>20 km</option>
+<option>Any</option>
+</select></div>
+<div class="form-group"><label>Urgency</label>
+<div class="form-row">
+<label><input type="radio" name="urg"> Normal</label>
+<label><input type="radio" name="urg"> Urgent</label>
+<label><input type="radio" name="urg"> Emergency</label>
+<label><input type="radio" name="urg"> Immediate</label>
+</div></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Number of People</label><input type="text"></div>
+<div class="form-group"><label>Preferred Room Type</label>
+<select>
+<option>Single</option>
+<option>Shared</option>
+<option>Family</option>
+</select></div>
+
+</div>
+
+<!-- TAB 3 -->
+<div id="tab3" class="tab">
+<h2>Safety & Accessibility</h2>
+<div class="form-group"><label>Safety Needs</label>
+<div class="form-row">
+<label><input type="checkbox"> Women only</label>
+<label><input type="checkbox"> Family safe</label>
+<label><input type="checkbox"> CCTV</label>
+<label><input type="checkbox"> Security</label>
+</div></div>
+<div class="form-group"><label>Accessibility</label>
+<div class="form-row">
+<label><input type="checkbox"> Wheelchair</label>
+<label><input type="checkbox"> Lift</label>
+<label><input type="checkbox"> Ground floor</label>
+<label><input type="checkbox"> Elderly friendly</label>
+</div></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Lighting</label>
+<div class="form-row">
+<label><input type="checkbox"> Good</label>
+<label><input type="checkbox"> Moderate</label>
+<label><input type="checkbox"> Poor</label>
+</div></div>
+<div class="form-group"><label>Emergency Exits</label><input type="text"></div>
+
+</div>
+
+<!-- TAB 4 -->
+<div id="tab4" class="tab">
+<h2>Medical & Family</h2>
+<div class="form-group"><label>Medical</label>
+<div class="form-row">
+<label><input type="checkbox"> Doctor</label>
+<label><input type="checkbox"> Hospital</label>
+<label><input type="checkbox"> Isolation</label>
+</div></div>
+<div class="form-group"><label>Family</label>
+<div class="form-row">
+<label><input type="checkbox"> Children</label>
+<label><input type="checkbox"> Child care</label>
+<label><input type="checkbox"> Family room</label>
+</div></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Medical Assistance Available</label><input type="text"></div>
+<div class="form-group"><label>Special Needs Family</label><input type="text"></div>
+
+</div>
+
+<!-- TAB 5 -->
+<div id="tab5" class="tab">
+<h2>Food & Support</h2>
+<div class="form-group"><label>Food</label>
+<div class="form-row">
+<label><input type="checkbox"> Veg</label>
+<label><input type="checkbox"> Nonveg</label>
+<label><input type="checkbox"> Diet</label>
+<label><input type="checkbox"> Baby food</label>
+</div></div>
+<div class="form-group"><label>Support</label>
+<div class="form-row">
+<label><input type="checkbox"> Job</label>
+<label><input type="checkbox"> NGO</label>
+<label><input type="checkbox"> Legal</label>
+<label><input type="checkbox"> Rehab</label>
+</div></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Meal Timings</label><input type="text"></div>
+<div class="form-group"><label>Volunteer Help Needed</label><input type="text"></div>
+
+</div>
+
+<!-- TAB 6 -->
+<div id="tab6" class="tab">
+<h2>Rules & Special</h2>
+<div class="form-group"><label>Rules</label>
+<div class="form-row">
+<label><input type="checkbox"> Quiet</label>
+<label><input type="checkbox"> Clean</label>
+<label><input type="checkbox"> Separate room</label>
+</div></div>
+<div class="form-group"><label>Special</label>
+<div class="form-row">
+<label><input type="checkbox"> Pet</label>
+<label><input type="checkbox"> Luggage</label>
+<label><input type="checkbox"> Alone</label>
+<label><input type="checkbox"> Group</label>
+</div></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Curfew Time</label><input type="text"></div>
+<div class="form-group"><label>Visitors Allowed</label>
+<select>
+<option>Yes</option>
+<option>No</option>
+</select></div>
+
+</div>
+
+<!-- TAB 7 -->
+<div id="tab7" class="tab">
+<h2>Priority & Filter</h2>
+<div class="form-group"><label>Priority</label>
+<select>
+<option>Normal</option>
+<option>Women</option>
+<option>Child</option>
+<option>Medical</option>
+<option>Emergency</option>
+</select></div>
+<div class="form-group"><label>Shelter Type</label>
+<div class="form-row">
+<label><input type="checkbox"> Govt</label>
+<label><input type="checkbox"> NGO</label>
+<label><input type="checkbox"> Private</label>
+<label><input type="checkbox"> Night</label>
+</div></div>
+<!-- Extra Fields -->
+<div class="form-group"><label>Available Beds</label><input type="text"></div>
+<div class="form-group"><label>Pet Friendly</label>
+<div class="form-row">
+<label><input type="checkbox"> Yes</label>
+<label><input type="checkbox"> No</label>
+</div></div>
+
+</div>
+
+<!-- TAB 8 -->
+<div id="tab8" class="tab">
+<h2>Search</h2>
+<button class="mainBtn" onclick="searchShelters()">Search Shelter</button>
+<!-- Extra Fields -->
+<div class="form-group"><label>Search Keyword</label><input type="text"></div>
+<div class="form-group"><label>Sort By</label>
+<select>
+<option>Distance</option>
+<option>Availability</option>
+<option>Priority</option>
+</select></div>
+
+</div>
+
+</div>
+
+<!-- MAP -->
+<div class="right">
+<div id="map"></div>
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+<script>
+let map=L.map('map').setView([19.07,72.87],10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let marker=null;
+map.on("click",e=>{
+  if(marker) map.removeLayer(marker);
+  marker=L.marker(e.latlng).addTo(map);
+  locText.value=e.latlng.lat+","+e.latlng.lng;
+});
+
+function openTab(n){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("tab"+n).classList.add("active");
+}
+
+function searchShelters(){
+  if(!marker){
+    alert("Select location");
+    return;
+  }
+  let u=marker.getLatLng();
+  let s=[
+    [19.1,72.9],
+    [19.05,72.8],
+    [19.2,72.85],
+    [19.15,72.75],
+    [19.08,72.95]
+  ];
+  s.forEach(p=>{
+    L.Routing.control({
+      waypoints:[
+        L.latLng(u.lat,u.lng),
+        L.latLng(p[0],p[1])
+      ]
+    }).addTo(map);
+  });
+}
+</script>
+
+</body>
+</html>

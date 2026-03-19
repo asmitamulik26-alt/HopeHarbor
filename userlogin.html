@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Login</title>
+
+<style>
+body{
+font-family: Arial;
+margin:0;
+background: linear-gradient(to right,#021b13,#064d36);
+}
+
+.container{
+width:400px;
+margin:50px auto;
+background:#dff5ee;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px #021b13;
+}
+
+h2{
+background:#064d36;
+color:white;
+padding:10px;
+border-radius:5px;
+text-align:center;
+}
+
+label{font-weight:bold;}
+
+input{
+width:100%;
+padding:8px;
+margin:8px 0;
+border-radius:5px;
+border:1px solid #064d36;
+}
+
+button{
+background:#0b7a56;
+color:white;
+padding:10px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+width:100%;
+}
+
+button:hover{
+background:#021b13;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>User Login</h2>
+
+<form id="loginForm">
+
+<label>Email</label>
+<input type="email" id="email" required>
+
+<label>Password</label>
+<input type="password" id="password" required>
+
+<button type="submit">Login</button>
+
+</form>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyDRLJ66Vic8tl9Qm2E4cXNwnsDRysKH4Vw",
+authDomain:"shsms-ba375.firebaseapp.com",
+projectId:"shsms-ba375",
+storageBucket:"shsms-ba375.firebasestorage.app",
+messagingSenderId:"439498208613",
+appId:"1:439498208613:web:09bdc77ee2f6c338269d8c"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+document.getElementById("loginForm").addEventListener("submit",async(e)=>{
+
+e.preventDefault();
+
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+
+try{
+
+const userCredential=await signInWithEmailAndPassword(auth,email,password);
+const uid=userCredential.user.uid;
+
+localStorage.setItem("currentUserUID",uid);
+
+const userDoc=await getDoc(doc(db,"users",uid));
+
+if(userDoc.exists()){
+
+const role=userDoc.data().role;
+
+if(role==="User"){
+window.location.href="preferences.html";
+}else{
+alert("This account is not registered as User.");
+}
+
+}
+
+}catch(error){
+alert("Login Failed: "+error.message);
+}
+
+});
+
+</script>
+
+</body>
+</html>

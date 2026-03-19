@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Preferences</title>
+
+<style>
+
+body {
+font-family: Arial;
+margin:0;
+background: linear-gradient(to right,#021b13,#064d36);
+}
+
+.container{
+width:600px;
+margin:50px auto;
+background:#dff5ee;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px #021b13;
+}
+
+h2{
+background:#064d36;
+color:white;
+padding:10px;
+border-radius:5px;
+text-align:center;
+}
+
+label{
+font-weight:bold;
+}
+
+input, select, textarea{
+width:100%;
+padding:8px;
+margin:8px 0;
+border-radius:5px;
+border:1px solid #064d36;
+}
+
+button{
+background:#0b7a56;
+color:white;
+padding:10px 20px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+width:100%;
+}
+
+button:hover{
+background:#021b13;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Shelter Preferences</h2>
+
+<label>Preferred Shelter Type</label>
+<select id="shelterType">
+<option>Male Shelter</option>
+<option>Female Shelter</option>
+<option>Family Shelter</option>
+<option>Any Available</option>
+</select>
+
+<label>Facilities Needed</label>
+
+<input type="checkbox" value="Food Support"> Food Support <br>
+<input type="checkbox" value="Medical Support"> Medical Support <br>
+<input type="checkbox" value="Child Care"> Child Care <br>
+<input type="checkbox" value="Job Assistance"> Job Assistance <br>
+
+<label>Emergency Contact Name</label>
+<input type="text" id="emergencyName">
+
+<label>Emergency Contact Phone</label>
+<input type="tel" id="emergencyPhone">
+
+<label>Additional Notes</label>
+<textarea id="additionalNotes" rows="4"></textarea>
+
+<button id="submitPreferences">Submit Preferences</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyDRLJ66Vic8tl9Qm2E4cXNwnsDRysKH4Vw",
+authDomain: "shsms-ba375.firebaseapp.com",
+projectId: "shsms-ba375",
+storageBucket: "shsms-ba375.firebasestorage.app",
+messagingSenderId: "439498208613",
+appId: "1:439498208613:web:09bdc77ee2f6c338269d8c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const currentUserUID = localStorage.getItem("currentUserUID");
+
+if(!currentUserUID){
+alert("No user logged in.");
+window.location.href = "userlogin.html";
+}
+
+document.getElementById("submitPreferences").addEventListener("click", async ()=>{
+
+const shelterType = document.getElementById("shelterType").value;
+
+const facilities = Array.from(
+document.querySelectorAll("input[type='checkbox']:checked")
+).map(el=>el.value);
+
+const emergencyName = document.getElementById("emergencyName").value;
+const emergencyPhone = document.getElementById("emergencyPhone").value;
+const additionalNotes = document.getElementById("additionalNotes").value;
+
+try{
+
+await setDoc(doc(db,"usersPreferences",currentUserUID),{
+
+shelterType,
+facilities,
+emergencyName,
+emergencyPhone,
+additionalNotes
+
+});
+
+alert("Preferences saved successfully!");
+
+window.location.href = "userpersonaldetails.html";
+
+}catch(error){
+
+alert("Error saving preferences: " + error.message);
+
+}
+
+});
+
+</script>
+
+</body>
+</html>

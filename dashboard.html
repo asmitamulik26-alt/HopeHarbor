@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex">
+
+<!-- Sidebar -->
+
+<div class="w-64 bg-blue-700 text-white h-screen p-5">
+
+<h2 class="text-2xl font-bold mb-8">
+SHSMS
+</h2>
+
+<ul>
+
+<li class="mb-4">Dashboard</li>
+<li class="mb-4">Shelters</li>
+<li class="mb-4">Donations</li>
+<li class="mb-4">Volunteers</li>
+
+</ul>
+
+</div>
+
+
+<!-- Content -->
+
+<div class="flex-1 p-10">
+
+<h1 class="text-3xl font-bold">
+Analytics Dashboard
+</h1>
+
+
+<div class="grid grid-cols-4 gap-6 mt-8">
+
+<div class="bg-white p-5 shadow rounded">
+
+<h3>12</h3>
+
+<p>Total Shelters</p>
+
+</div>
+
+<div class="bg-white p-5 shadow rounded">
+
+<h3>87</h3>
+
+<p>Available Beds</p>
+
+</div>
+
+<div class="bg-white p-5 shadow rounded">
+
+<h3>145</h3>
+
+<p>People Helped</p>
+
+</div>
+
+<div class="bg-white p-5 shadow rounded">
+
+<h3>24</h3>
+
+<p>Volunteers</p>
+
+</div>
+
+</div>
+
+
+<canvas id="chart" class="mt-10"></canvas>
+
+</div>
+
+</div>
+
+<script src="dashboard.js"></script>
+
+</body>
+</html>
